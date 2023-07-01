@@ -43,21 +43,23 @@ function uploadCsv(path){
     let fileStream = csv
     .parse()
     .on('data', function(data){
-        csvData.push(data)
+        csvData.push(data);
     })
     .on('end', function(){
-        csvData.shift()
-        pool.getConnection((error,connection)=>{
+        csvData.shift();
+
+        pool.getConnection(error =>{
             if(error){
                 console.log(error)
             } else {
-                let query = "INSERT INTO students (LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) VALUES ?"
-                connection(query,[csvData],(error,res)=>{
+                let query = "INSERT INTO students (STUDENT_ID, LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) VALUES ?"
+                pool.query(query,[csvData],(error,res)=>{
                     console.log(error || res);
 
                 });
             }
         } )
+        fs.unlinkSync(path)
     })
     stream.pipe(fileStream)
 }
@@ -70,6 +72,7 @@ app.get('/',(req,res) => {
 app.post('/import-csv',upload.single('import-csv'),(req,res) => {
     console.log(req.file.path)
     uploadCsv(__dirname + "/uploads/" + req.file.filename)
+    res.send("Records successfully added!")
 })
 
 app.listen(5000, () => {

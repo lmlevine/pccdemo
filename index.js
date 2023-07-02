@@ -1,3 +1,4 @@
+// Getting all our ducks in a row in terms of required packages!
 const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql')
@@ -6,6 +7,7 @@ const path = require('path')
 const csv = require('fast-csv')
 const fs = require('fs')
 
+// Will be running a Node express webapp for this demo
 const app = express()
 
 app.use(bodyParser.urlencoded({extended:false}))
@@ -37,6 +39,9 @@ const pool = mysql.createPool({
     database: "PCC_Schema"
 })
 
+
+// Worker function to upload the CSV file, parse it, then connect to the server and submit a custom 
+// INSERT query to add the new data
 function uploadCsv(path){
     let stream = fs.createReadStream(path)
     let csvData = []
@@ -56,7 +61,7 @@ function uploadCsv(path){
                 pool.query(query,[csvData],(error,res)=>{
                     console.log(error || res);
 
-                });
+               });
             }
         } )
         fs.unlinkSync(path)
@@ -64,17 +69,46 @@ function uploadCsv(path){
     stream.pipe(fileStream)
 }
 
+// Function to query the database table of interest, and return results
+// currently outputs to consle
+// TO DO: return results of query and pass through to display on website UI
+function displayData(){
+    let data = ""
+    pool.getConnection(error =>{
+        if(error){
+            console.log(error)
+        } else {
+            let queryDisplay = "SELECT * FROM students ORDER BY STUDENT_ID desc"
+            pool.query(queryDisplay,(error,res)=>{
+                console.log(error || res);
+                data = res
+            });
+            }
+        } )
+    return data
+    }
+
+// Method to bind our html file and send it in response to users querying our URL
 app.get('/',(req,res) => {
     res.sendFile(__dirname + "/index.html")
 }
 )
 
+
+// Method to react upon data being sent to our server (in this case the CSV file). 
+// Upon the user clicking upload it triggers the post command which results in the following
+// 1. File is stored into local directory
+// 2. File is parsed and fed into a custom query to insert into database
+// 3. Table is then queried and results displayed
 app.post('/import-csv',upload.single('import-csv'),(req,res) => {
     console.log(req.file.path)
     uploadCsv(__dirname + "/uploads/" + req.file.filename)
-    res.send("Records successfully added!")
+    displayData()
+    res.send("Records successfully added!" + displayData())
 })
 
+
+// Listener method for our Node Express webapp server to listen on a particular port
 app.listen(5000, () => {
     console.log("App is running. Listening on Port 5000")
 })

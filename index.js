@@ -1,4 +1,7 @@
-// Getting all our ducks in a row in terms of required packages!
+// PCC FACULTY DEMONSTRATION
+// Sample code!
+
+// Getting all our ducks in a row in terms of required packages! Make sure all are installed on your device
 const express = require('express')
 const bodyParser = require('body-parser')
 const mysql = require('mysql')
@@ -10,8 +13,8 @@ const fs = require('fs')
 // Will be running a Node express webapp for this demo
 const app = express()
 
-app.use(bodyParser.urlencoded({extended:false}))
-app.use(bodyParser.json())
+
+// File storage elements Leveraging Multer //
 
 // File storage and management 
 let storage = multer.diskStorage({
@@ -31,7 +34,14 @@ let upload =  multer({
     storage:storage
 })
 
-//Establish connection with MySQL Database
+
+// Parsing CSV document into JSON format. Root JS library Does not need to be installed.
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
+
+// Database Elements 
+
+//Defining credentials connection with MySQL Database
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
@@ -85,11 +95,6 @@ function displayData(){
         } )
     }
 
-    
-    function show_global_var_value()
-    {
-        console.log(global_var); // "abc"
-    }
 
 // Method to bind our html file and send it in response to users querying our URL
 app.get('/',(req,res) => {

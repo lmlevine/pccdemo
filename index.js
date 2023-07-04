@@ -16,7 +16,7 @@ const app = express()
 
 // File storage elements Leveraging Multer //
 
-// File storage and management 
+// Create Storage Object and pass class inherited methods from the multer class 
 let storage = multer.diskStorage({
     // Setting target directory
     destination:(req,file,callback) => {
@@ -29,19 +29,19 @@ let storage = multer.diskStorage({
 
 })
 
-// Take storage properties and pass them to the multer method
+// Pass the storage object to the multer constructor. This middleware function can now be passed directly to the post method
 let upload =  multer({
     storage:storage
 })
 
 
-// Parsing CSV document into JSON format. Root JS library Does not need to be installed.
+// Middleware essential to application when accessing form data. Parsing CSV document into JSON format. Root JS library Does not need to be installed.
 app.use(bodyParser.urlencoded({extended:false}))
 app.use(bodyParser.json())
 
 // Database Elements 
 
-//Defining credentials connection with MySQL Database
+//Defining mysql object with credentials for connection with MySQL Database
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",
@@ -50,19 +50,25 @@ const pool = mysql.createPool({
 })
 
 
-// Worker function to upload the CSV file, parse it, then connect to the server and submit a custom 
+// External Worker function to upload the CSV file, parse it, then connect to the server and submit a custom 
 // INSERT query to add the new data
 function uploadCsv(path){
+    // Filesystem to access file and read it
     let stream = fs.createReadStream(path)
+    // empty array initialized to read into
     let csvData = []
+    // Concatenating different fast-csv methods
     let fileStream = csv
     .parse()
+    // on event 'data' true or present run callback function to read data and push it onto the array
     .on('data', function(data){
         csvData.push(data);
     })
+    // Once csv parsing is complete (unique event trigger 'end'), run callback function to generate sql query and pass query through to database 
     .on('end', function(){
+        // Since first row of array is column headers we call the shift method to begin from the second indexed row
         csvData.shift();
-
+        // mySQL method inhertied to object for establishing connection to mySQL server
         pool.getConnection(error =>{
             if(error){
                 console.log(error)
@@ -74,8 +80,11 @@ function uploadCsv(path){
                });
             }
         } )
+        // nice file system method to clear working files from webserver directory once parsing is complete
+        // kind of negates the need for unique naming conventions but oh well! That was a cool chunk of code.
         fs.unlinkSync(path)
     })
+    // Calling the pipe method to pass the fast-csv set of objects. Must be called outside of code blocks defining filestream elements
     stream.pipe(fileStream)
 }
 
@@ -83,6 +92,7 @@ function uploadCsv(path){
 // currently outputs to consle
 // TO DO: return results of query and pass through to display on website UI
 function displayData(){
+    // mySQL method inhertied to object for establishing connection to mySQL server
     pool.getConnection(error =>{
         if(error){
             console.log(error)
@@ -112,6 +122,8 @@ app.post('/import-csv',upload.single('import-csv'),(req,res) => {
     console.log(req.file.path)
     uploadCsv(__dirname + "/uploads/" + req.file.filename)
     displayData()
+    // Basic send method to display results on the screen to the user 
+    // TO DO: display the darn records instead!
     res.send("File uploaded successfully!")
 })
 

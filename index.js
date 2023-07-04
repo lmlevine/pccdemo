@@ -36,7 +36,7 @@ const pool = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "password",
-    database: "PCC_Schema"
+    database: "PCC_Demo"
 })
 
 
@@ -57,9 +57,9 @@ function uploadCsv(path){
             if(error){
                 console.log(error)
             } else {
-                let query = "INSERT INTO students (STUDENT_ID, LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) VALUES ?"
+                let query = "INSERT INTO import (STUDENT_ID, LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) VALUES ?"
                 pool.query(query,[csvData],(error,res)=>{
-                    console.log(error || res);
+                   console.log(error || res);
 
                });
             }
@@ -72,15 +72,13 @@ function uploadCsv(path){
 // Function to query the database table of interest, and return results
 // currently outputs to consle
 // TO DO: return results of query and pass through to display on website UI
-//var output = []
 function displayData(){
     pool.getConnection(error =>{
         if(error){
             console.log(error)
         } else {
-            let queryDisplay = "SELECT * FROM students ORDER BY STUDENT_ID desc"
+            let queryDisplay = "SELECT * FROM PCC_Demo.import ORDER BY STUDENT_ID desc;"
             pool.query(queryDisplay,(error,res)=>{
- //               let output = res
                 console.log(error || res);
             });
             }
@@ -109,7 +107,6 @@ app.post('/import-csv',upload.single('import-csv'),(req,res) => {
     console.log(req.file.path)
     uploadCsv(__dirname + "/uploads/" + req.file.filename)
     displayData()
-    console.log(output)
     res.send("File uploaded successfully!")
 })
 

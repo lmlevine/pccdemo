@@ -108,7 +108,8 @@ BEGIN
 	INSERT INTO courses(COURSE_NUMBER)
 		SELECT new.COURSE_NUMBER
 		WHERE NOT EXISTS (SELECT * FROM courses WHERE COURSE_NUMBER = new.COURSE_NUMBER);
-	INSERT INTO grades(studentid, courseid, ASSIGNMENT_NUMBER, SUBMISSION_DATE, GRADE) values (new.STUDENT_ID, (SELECT idcourses from courses WHERE COURSE_NUMBER=new.COURSE_NUMBER), new.ASSIGNMENT_NUMBER, new.SUBMISSION_DATE, new.GRADE); 
+	INSERT INTO grades(studentid, courseid, ASSIGNMENT_NUMBER, SUBMISSION_DATE, GRADE) values (new.STUDENT_ID, (SELECT idcourses from courses WHERE COURSE_NUMBER=new.COURSE_NUMBER ), new.ASSIGNMENT_NUMBER, new.SUBMISSION_DATE, new.GRADE); 
+    DELETE FROM grades WHERE studentid = new.STUDENT_ID AND ASSIGNMENT_NUMBER = new.ASSIGNMENT_NUMBER AND SUBMISSION_DATE < new.SUBMISSION_DATE;
 
 END$$
 
@@ -123,6 +124,14 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- Insert Sample Data
 -- -----------------------------------------------------
 
--- INSERT INTO PCC_Demo.import (STUDENT_ID,LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) 
--- VALUES (1,'Potter','Harry','harry.potter@pasadena.edu','123-456-7890','CSC101',1,'2023-01-15','A'),
--- (2,'Granger','Hermione','hermione.granger@pasadena.edu','987-654-3210','CSC102',1,'2023-01-15','A');
+ INSERT INTO PCC_Demo.import (STUDENT_ID,LAST_NAME,FIRST_NAME,EMAIL_ADDRESS,PHONE_NUMBER,COURSE_NUMBER,ASSIGNMENT_NUMBER,SUBMISSION_DATE,GRADE) 
+ VALUES     (1,'Potter','Harry','harry.potter@pasadena.edu','123-456-7890','CSC101',1,'2023-01-15','B'),
+            (2,'Granger','Hermione','hermione.granger@pasadena.edu','987-654-3210','CSC102',1,'2023-01-15','A'),
+            (3,'Weasley','Ron','ron.weasley@pasadena.edu','555-555-5555','CSC101',1,'2023-01-15','B'),
+            (4,'Stark','Tony','tony.stark@pasadena.edu','111-222-3333','CSC102',1,'2023-01-15','A'),
+            (5,'Rogers','Steve','steve.rogers@pasadena.edu','444-444-4444','CSC103',1,'2023-01-15','B'),
+            (6,'Parker','Peter','peter.parker@pasadena.edu','999-999-9999','CSC103',1,'2023-01-15','C'),
+            (7,'Skywalker','Luke','luke.skywalker@pasadena.edu','777-777-7777','CSC101',1,'2023-01-15','B'),
+            (8,'Leia','Organa','leia.organa@pasadena.edu','888-888-8888','CSC101',1,'2023-01-15','A'),
+            (9,'Kenobi','Obi-Wan','obiwan.kenobi@pasadena.edu','666-666-6666','CSC102',1,'2023-01-15','A'),
+            (10,'Poppins','Mary','mary.poppins@pasadena.edu','222-333-4444','CSC103',1,'2023-01-15','B');

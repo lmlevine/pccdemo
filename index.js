@@ -72,20 +72,25 @@ function uploadCsv(path){
 // Function to query the database table of interest, and return results
 // currently outputs to consle
 // TO DO: return results of query and pass through to display on website UI
+//var output = []
 function displayData(){
-    let data = ""
     pool.getConnection(error =>{
         if(error){
             console.log(error)
         } else {
             let queryDisplay = "SELECT * FROM students ORDER BY STUDENT_ID desc"
             pool.query(queryDisplay,(error,res)=>{
+ //               let output = res
                 console.log(error || res);
-                data = res
             });
             }
         } )
-    return data
+    }
+
+    
+    function show_global_var_value()
+    {
+        console.log(global_var); // "abc"
     }
 
 // Method to bind our html file and send it in response to users querying our URL
@@ -104,7 +109,8 @@ app.post('/import-csv',upload.single('import-csv'),(req,res) => {
     console.log(req.file.path)
     uploadCsv(__dirname + "/uploads/" + req.file.filename)
     displayData()
-    res.send("Records successfully added!" + displayData())
+    console.log(output)
+    res.send("File uploaded successfully!")
 })
 
 
